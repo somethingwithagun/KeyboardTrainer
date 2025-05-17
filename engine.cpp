@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "wordinput.h"
 
 Engine::Engine(int fps) : m_fps(fps) {
   if(!m_font.loadFromFile(NOTOSANS_FONT_PATH))
@@ -10,7 +11,8 @@ Engine::Engine(int fps) : m_fps(fps) {
 		m_loadLyricsButton = new Button(sf::Vector2f(150,50),"Load Lyrics",m_font,m_buttonColor);
 		m_translateWordButton = new Button(sf::Vector2f(150,50),"Translate",m_font,m_buttonColor);
 
-		m_wordLabel = sf::Text("",m_font);  
+		wordLabel = sf::Text("",m_font);  
+		wordInput.setFont(m_font);
 		m_translatedWordLabel = sf::Text("",m_font);  
 		m_mistakesLabel = sf::Text("0.00%",m_font);
 		m_mistakesLabel.setFillColor(RED);
@@ -23,8 +25,6 @@ Engine::Engine(int fps) : m_fps(fps) {
 	m_plot.setSize(sf::Vector2f(1000,400));
 	m_plot.setFont(&m_font);
   m_plot.setOrigin(m_plot.getSize().x/2,m_plot.getSize().y/2);
-
-	// m_words = {"vse", "rabotaet"};
 }
 
 Engine::~Engine() {	
@@ -105,15 +105,14 @@ void Engine::initVariables() {
 
 	m_currentTranslatedWord = "";
 	
-	changeWord();
+	if(!m_words.empty())
+		setWordToDisplay(m_words[m_wordIndex]);
 
 	m_dtClock.restart();
 	m_timer.restart();
 }
 
 void Engine::start() {
-  init();
-	
   while(m_app->isOpen()) {
 		sf::Event e;
 		while(m_app->pollEvent(e)) {
@@ -138,15 +137,12 @@ void Engine::start() {
 					}
 					else if(!m_isAnyDialogsOpen) {
 						if(e.text.unicode == BACKSPACE_CODE) {
-							if(!m_letters.empty()){
-								delete m_letters.back();
-								m_letters.pop_back();
-							}
-						} else if(e.text.unicode == ENTER_CODE || e.text.unicode == SPACE_CODE) { // enter or space
+							wordInput.removeLetter();
+						} else if(e.text.unicode == ENTER_CODE || e.text.unicode == SPACE_CODE) {
 							if(m_isGameOver) {
 								initVariables();
 								m_isGameOver = false;
-							}else if(m_letters.size() == m_currentWord.getSize() && !m_words.empty()) {
+							}else if(wordInput.isFull() && !m_words.empty()) {
 								float stat = calculateStats(mistakes,summaryChars);
 
 								m_mistakesLabel.setString(ftostr(stat)+"%");
@@ -163,43 +159,35 @@ void Engine::start() {
 								
 								m_tryRating += round(float(summaryChars-mistakes)/(m_timer.restart().asSeconds()*10)); // TODO: improve formula
 
-								changeWord();
-								if(m_currentWord.isEmpty()) {
+								m_wordIndex++;
+								setWordToDisplay(m_words[m_wordIndex]);
+								if(m_words[m_wordIndex].empty()) {
 									std::cout << "*** SONG ENDED ***\n";
 									std::cout << "Rating: "<< m_tryRating << '\n';
 									std::cout << "Symbols written: "<< summaryChars << '\n';
 									std::cout << "Errors: " << mistakes << '\n' << std::flush;
 			
-									std::string curTime = currentTime();
+									std::string curTime = getCurrentTime();
 									m_plot.apply(curTime,m_tryRating);
 									writeRating(curTime,m_tryRating);
 
 									m_translatedWordLabel.setString("");
-									m_wordLabel.setString("Song ended! Press Enter to restart");
-									m_wordLabel.setOrigin(m_wordLabel.getGlobalBounds().width/2,m_wordLabel.getGlobalBounds().height/2);
-									m_wordLabel.setPosition(m_app->getSize().x/2, 200);
+									wordLabel.setString("Song ended! Press Enter to restart");
+									wordLabel.setOrigin(wordLabel.getGlobalBounds().width/2,wordLabel.getGlobalBounds().height/2);
+									wordLabel.setPosition(m_app->getSize().x/2, 200);
 
-									freeVector(m_letterPlaces);
-									freeVector(m_letters);
+									wordInput.clear();
 
 									m_isGameOver = true;
-								}else {}
-								
+								}
 							}
 
 						}
 						else if(e.text.unicode > SPACE_CODE && e.text.unicode < 128) {
-							if(m_letters.size() < m_currentWord.getSize()) {
-								m_letters.push_back(new sf::Text(sf::String(e.text.unicode), m_font));
+							if(!wordInput.appendLetter(e.text.unicode)) 
+								mistakes++;
 
-								if(e.text.unicode != m_currentWord[m_letters.size()-1]) {
-									m_letters.back()->setFillColor(sf::Color::Red);
-									mistakes++;
-								}
-								
-								m_letters.back()->setOrigin(m_letters.back()->getGlobalBounds().width/2,m_letters.back()->getGlobalBounds().height/2);
-								m_letters.back()->setPosition(m_letterPlaces[m_letters.size()-1]->getPosition().x, 300);
-							}
+							wordInput.update(m_app->getSize());
 						}
 					}
 				}
@@ -218,6 +206,7 @@ void Engine::start() {
 					else {
 						AzLyricsParser parser;
 						m_words = parser.getLyricsList(author, songname);
+
 						initVariables();
 					}
 				}
@@ -266,7 +255,7 @@ void Engine::start() {
 						
 						std::ofstream ratingFile(RATING_TXT_PATH);
 						if(ratingFile.is_open()){
-							std::cout << "Cleared rating at " << currentTime() << std::endl;
+							std::cout << "Cleared rating at " << getCurrentTime() << std::endl;
 							ratingFile.close();
 
 							m_plot.reset();
@@ -306,7 +295,7 @@ void Engine::start() {
 							m_translateWordButton->setFillColor(RED);
 							m_translateWordButton->setText("Hide");
 
-							m_currentTranslatedWord = translateWord(m_currentWord);
+							m_currentTranslatedWord = translateWord(m_words[m_wordIndex]);
 							m_translatedWordLabel.setString(m_currentTranslatedWord);
 							m_translatedWordLabel.setOrigin(m_translatedWordLabel.getGlobalBounds().width/2,m_translatedWordLabel.getGlobalBounds().height/2);
 							m_translatedWordLabel.setPosition(m_app->getSize().x/2, 425);
@@ -335,7 +324,8 @@ void Engine::start() {
 		// if(m_enableTranslate->getChecked()) m_enableTranslate->update(m_dt);
 
 		m_app->clear(sf::Color(26, 26, 26));
-		m_app->draw(m_wordLabel);
+		m_app->draw(wordLabel);
+		m_app->draw(wordInput);
 
 		// if(m_enableTranslate->getChecked()) m_app->draw(m_translatedWordLabel);
 		m_app->draw(m_translatedWordLabel);
@@ -349,11 +339,7 @@ void Engine::start() {
 		m_app->draw(*m_loadLyricsButton);
 		m_app->draw(*m_translateWordButton);
 
-		for(int i = 0; i < m_letterPlaces.size(); i++)
-				m_app->draw(*m_letterPlaces[i]);
-		for(int i = 0; i < m_letters.size(); i++)
-				m_app->draw(*m_letters[i]);
-
+	
 		if(m_requestLyricsDialog)
 			m_requestLyricsDialog->render(m_app);
 
@@ -365,8 +351,8 @@ void Engine::start() {
 		m_dt = m_dtClock.restart().asSeconds();
 		m_counterA += m_dt;
 	}
-	freeVector(m_letterPlaces);
-	freeVector(m_letters);
+
+	wordInput.clear();
 }
 
 void Engine::loadLyrics(std::string path) {
@@ -402,22 +388,12 @@ std::string Engine::ftostr(float x) const {
 	return stream.str();
 }
 
-std::string Engine::setRandomWord() {
+std::string Engine::getRandomWord() {
 	srand(time(0));
 	return m_words[rand() % (m_words.size())];
 }
 
-
-void Engine::nextWord() {
-	if(m_words.size() == m_wordIndex) {
-		m_currentWord = "";
-	} else {
-		m_currentWord = m_words[m_wordIndex];
-		m_wordIndex++;
-	}
-}
-
-std::string Engine::currentTime() {
+std::string Engine::getCurrentTime() {
 	time_t t = time(0);
 	tm* t1 = localtime(&t);
 	int h = t1->tm_hour,
@@ -426,25 +402,20 @@ std::string Engine::currentTime() {
 	return ((h<10?"0":"") + std::to_string(h) + ':' +(m<10?"0":"") + std::to_string(m) + ':' + (s<10?"0":"")+ std::to_string(s));
 }
 
-void Engine::changeWord() {
-	nextWord();
+std::string Engine::getNextWord() {
+	return (m_words.size() - 1 < m_wordIndex && !m_words.empty()) ? "" : m_words[m_wordIndex + 1];
+}
 
-	m_wordLabel.setString(m_currentWord);
-	m_wordLabel.setOrigin(m_wordLabel.getGlobalBounds().width/2,m_wordLabel.getGlobalBounds().height/2);
-	m_wordLabel.setPosition(m_app->getSize().x/2, 200);
+void Engine::setWordToDisplay(sf::String word) {
+	wordLabel.setString(word);
+	wordLabel.setOrigin(wordLabel.getGlobalBounds().width/2,wordLabel.getGlobalBounds().height/2);
+	wordLabel.setPosition(m_app->getSize().x/2, 200);
 	
-	freeVector(m_letterPlaces);
+	wordInput.clear();
+	wordInput.update(m_app->getSize());
+	wordInput.setWord(word);
 
-	int word_container_width = m_currentWord.getSize()*(100 +m_charSpacing) - m_charSpacing;
-	int offset = m_app->getSize().x/2 - word_container_width/2 + 50;
-	for(int i = 0; i < m_currentWord.getSize(); i++) {
-			m_letterPlaces.push_back(new sf::RectangleShape(sf::Vector2f(100,15)));
-			m_letterPlaces[i]->setOrigin(m_letterPlaces[i]->getSize().x/2,m_letterPlaces[i]->getSize().y/2);
-			m_letterPlaces[i]->setPosition(sf::Vector2f((m_charSpacing+100) * i + offset, 350));
-	}
-	freeVector(m_letters);
-
-	summaryChars += m_currentWord.getSize();
+	summaryChars += word.getSize();
 }
 
 sf::String Engine::translateWord(std::string word) {

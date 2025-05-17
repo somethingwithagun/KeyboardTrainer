@@ -22,6 +22,7 @@
 #include "parser.h"
 #include "requestsongdialog.h"
 #include "loadlyricsdialog.h"
+#include "wordinput.h"
 
 class Engine {
 public:
@@ -30,19 +31,21 @@ public:
 
   void start();
 
-private:
   void init();
+  
+private:
   void initVariables();
   
-  std::string setRandomWord();
-  void nextWord();
+  std::string getRandomWord();
+
+  std::string getNextWord();
 
   float calculateStats(const int mistakes, const int letters) const;
   std::string ftostr(float x) const;
 
-  std::string currentTime();
+  std::string getCurrentTime();
 
-  void changeWord();
+  void setWordToDisplay(sf::String word);
   void loadLyrics(std::string path);
   sf::String translateWord(std::string word);
   sf::String decodeTranslatedWord(std::string word);
@@ -64,8 +67,6 @@ private:
   }; //symbol to rus
 
   int m_wordIndex;
-  
-  const int m_charSpacing = 20;
 
 	sf::Clock m_dtClock;
 	sf::Clock m_timer;
@@ -79,9 +80,11 @@ private:
   bool m_isGameOver;
   bool m_isAnyDialogsOpen;
   
-  sf::String m_currentWord;
+  //sf::String m_currentWord;
   sf::String m_currentTranslatedWord;
-	sf::Text m_wordLabel;
+
+	sf::Text wordLabel;
+  WordInput wordInput;
 	sf::Text m_translatedWordLabel;
 	sf::Text m_mistakesLabel;
 	sf::Text m_correctLabel;
@@ -111,8 +114,8 @@ private:
 
   std::vector<std::string> m_words;
   std::vector<sf::String> m_translatedWords;
-  std::vector<sf::RectangleShape*> m_letterPlaces;
-	std::vector<sf::Text*> m_letters;
+  //std::vector<sf::RectangleShape*> letterPlaces;
+	//std::vector<sf::Text*> letters;
 
 
 };

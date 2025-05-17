@@ -8,7 +8,8 @@ set(CURL_INCLUDE_DIR D:/libs/curl-8.6.0-gcc/include)
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "-g")
 
 add_executable(MKT WIN32
 	dialogbase.h dialogbase.cpp
@@ -21,6 +22,7 @@ add_executable(MKT WIN32
 	engine.h engine.cpp
 	drawfuncs.h drawfuncs.cpp
 	plotwidget.h plotwidget.cpp
+	wordinput.h wordinput.cpp
 	main.cpp
 )
 
