@@ -1,363 +1,381 @@
 #include "engine.h"
 #include "wordinput.h"
 
-Engine::Engine(int fps) : m_fps(fps) {
-  if(!m_font.loadFromFile(NOTOSANS_FONT_PATH))
+Engine::Engine(int fps) : fps(fps) {
+  if(!font.loadFromFile(NOTOSANS_FONT_PATH))
     std::cerr << "Engine::Engine(int): Could not open font" << std::endl;
 	else {
-		m_exitButton = new Button(sf::Vector2f(50,50),"X",m_font,RED);
-		m_clearRatingButton = new Button(sf::Vector2f(150,50),"Clear Rating",m_font,m_buttonColor);
-		m_requestLyricsButton = new Button(sf::Vector2f(150,50),"Request Song",m_font,m_buttonColor);
-		m_loadLyricsButton = new Button(sf::Vector2f(150,50),"Load Lyrics",m_font,m_buttonColor);
-		m_translateWordButton = new Button(sf::Vector2f(150,50),"Translate",m_font,m_buttonColor);
+		exitButton = new Button(sf::Vector2f(50,50),"X",font,RED);
+		clearRatingButton = new Button(sf::Vector2f(150,50),"Clear Rating",font,buttonColor);
+		requestLyricsButton = new Button(sf::Vector2f(150,50),"Request Song",font,buttonColor);
+		loadLyricsButton = new Button(sf::Vector2f(150,50),"Load Lyrics",font,buttonColor);
+		translateWordButton = new Button(sf::Vector2f(150,50),"Translate",font,buttonColor);
 
-		wordLabel = sf::Text("",m_font);  
-		wordInput.setFont(m_font);
-		m_translatedWordLabel = sf::Text("",m_font);  
-		m_mistakesLabel = sf::Text("0.00%",m_font);
-		m_mistakesLabel.setFillColor(RED);
+		wordLabel = sf::Text("",font);  
+		wordInput.setFont(font);
+		translatedWordLabel = sf::Text("",font);  
+		mistakesLabel = sf::Text("0.00%",font);
+		mistakesLabel.setFillColor(RED);
+		mistakesLabel.setOrigin(mistakesLabel.getGlobalBounds().width/2,mistakesLabel.getGlobalBounds().height/2);
 
-		m_correctLabel = sf::Text("0.00%",m_font);
-		m_correctLabel.setFillColor(GREEN);
+		correctLabel = sf::Text("0.00%",font);
+		correctLabel.setFillColor(GREEN);
 	}
-	m_mistakesLabel.setOrigin(m_mistakesLabel.getGlobalBounds().width/2,m_mistakesLabel.getGlobalBounds().height/2);
-
-	m_plot.setSize(sf::Vector2f(1000,400));
-	m_plot.setFont(&m_font);
-  m_plot.setOrigin(m_plot.getSize().x/2,m_plot.getSize().y/2);
+	
+	plot.setSize(sf::Vector2f(1000,400));
+	plot.setFont(&font);
+  plot.setOrigin(plot.getSize().x/2,plot.getSize().y/2);
 }
 
 Engine::~Engine() {	
-  delete m_app;
-	if(m_exitButton)
-		delete m_exitButton;
+  delete window;
+	if(exitButton)
+		delete exitButton;
 
-	if(m_clearRatingButton)
-		delete m_clearRatingButton;
+	if(clearRatingButton)
+		delete clearRatingButton;
 	
-	if(m_requestLyricsButton)
-		delete m_requestLyricsButton;
+	if(requestLyricsButton)
+		delete requestLyricsButton;
 	
-	if(m_loadLyricsButton)
-		delete m_loadLyricsButton;
+	if(loadLyricsButton)
+		delete loadLyricsButton;
 	
-	if(m_translateWordButton)
-		delete m_translateWordButton;
+	if(translateWordButton)
+		delete translateWordButton;
 }
 
 void Engine::init() {
-  m_app = new sf::RenderWindow(sf::VideoMode(1920,1080,32), "Keyboard Trainer controller", sf::Style::Default | sf::Style::Fullscreen);
-  m_app->setFramerateLimit(m_fps);
+  window = new sf::RenderWindow(sf::VideoMode(1920,1080,32), "Keyboard Trainer controller", sf::Style::Default | sf::Style::Fullscreen);
+  window->setFramerateLimit(fps);
 	
-	if(m_exitButton)
-		m_exitButton->setPosition(sf::Vector2f(m_app->getSize().x-25, 25));
+	if(exitButton)
+		exitButton->setPosition(sf::Vector2f(window->getSize().x-25, 25));
 	
-	if(m_clearRatingButton)
-		m_clearRatingButton->setPosition(sf::Vector2f(m_app->getSize().x/2 - 160-80, m_app->getSize().y-m_clearRatingButton->getSize().y/2));
+	if(clearRatingButton)
+		clearRatingButton->setPosition(sf::Vector2f(window->getSize().x/2 - 160-80, window->getSize().y-clearRatingButton->getSize().y/2));
 	
-	if(m_requestLyricsButton)
-		m_requestLyricsButton->setPosition(sf::Vector2f(m_app->getSize().x/2 - 80, m_app->getSize().y-m_requestLyricsButton->getSize().y/2));
+	if(requestLyricsButton)
+		requestLyricsButton->setPosition(sf::Vector2f(window->getSize().x/2 - 80, window->getSize().y-requestLyricsButton->getSize().y/2));
 	
-	if(m_loadLyricsButton)
-		m_loadLyricsButton->setPosition(sf::Vector2f(m_app->getSize().x/2 + 80, m_app->getSize().y-m_loadLyricsButton->getSize().y/2));
+	if(loadLyricsButton)
+		loadLyricsButton->setPosition(sf::Vector2f(window->getSize().x/2 + 80, window->getSize().y-loadLyricsButton->getSize().y/2));
 	
-	if(m_translateWordButton)
-		m_translateWordButton->setPosition(sf::Vector2f(m_app->getSize().x/2 +160 + 80, m_app->getSize().y-m_translateWordButton->getSize().y/2));
+	if(translateWordButton) {
+		translateWordButton->setPosition(sf::Vector2f(window->getSize().x/2 +160 + 80, window->getSize().y-translateWordButton->getSize().y/2));
+		translateWordButton->setText("Translate");
+		translateWordButton->setFillColor(buttonColor);
+	}
 
-  m_mistakesLabel.setPosition(m_app->getSize().x/2 + 150, 100);
-  m_correctLabel.setPosition(m_app->getSize().x/2 - 150, 100);
+  mistakesLabel.setPosition(window->getSize().x/2 + 150, 100);
+  correctLabel.setPosition(window->getSize().x/2 - 150, 100);
 	
-	m_translatedWordLabel.setOrigin(m_translatedWordLabel.getGlobalBounds().width/2,m_translatedWordLabel.getGlobalBounds().height/2);
-	m_translatedWordLabel.setPosition(m_app->getSize().x/2, 425);
+	translatedWordLabel.setOrigin(translatedWordLabel.getGlobalBounds().width/2,translatedWordLabel.getGlobalBounds().height/2);
+	translatedWordLabel.setPosition(window->getSize().x/2, 425);
 
-  m_plot.setPosition(m_app->getSize().x/2, m_app->getSize().y/2 + 200);
-  m_plot.loadFromFile(RATING_TXT_PATH);
+  plot.setPosition(window->getSize().x/2, window->getSize().y/2 + 200);
+  plot.loadFromFile(RATING_TXT_PATH);
+
 
 	initVariables();
 
 }
 
+void Engine::handleDialogKeybinds(const sf::Event& e) {
+	if(requestLyricsDialog && requestLyricsDialog->getIsOpen()){					
+		if(e.text.unicode == BACKSPACE_CODE)
+			requestLyricsDialog->symErased();
+		else if(e.text.unicode >= SPACE_CODE && e.text.unicode < 128)
+			requestLyricsDialog->symEntered(e.text.unicode);
+	} else if(loadLyricsDialog && loadLyricsDialog->getIsOpen()){
+		
+		if(e.text.unicode == BACKSPACE_CODE)
+			loadLyricsDialog->symErased();
+		else if(e.text.unicode >= SPACE_CODE && e.text.unicode < 128)
+			loadLyricsDialog->symEntered(e.text.unicode);
+	}
+}
+
+void Engine::handleMainKeybinds(const sf::Event& e) {
+	if(e.text.unicode == BACKSPACE_CODE) {
+		wordInput.removeLetter();
+	} else if(e.text.unicode == ENTER_CODE || e.text.unicode == SPACE_CODE) {
+		if(isGameOver) {
+			initVariables();
+			isGameOver = false;
+		}else if(wordInput.isFull() && !words.empty()) {
+			float stat = calculateStats(mistakes,summaryChars);
+
+			mistakesLabel.setString(ftostr(stat)+"%");
+			mistakesLabel.setOrigin(mistakesLabel.getGlobalBounds().width/2,mistakesLabel.getGlobalBounds().height/2);
+
+			correctLabel.setString(ftostr(100.f - stat)+"%");
+			correctLabel.setOrigin(correctLabel.getGlobalBounds().width/2,correctLabel.getGlobalBounds().height/2);
+
+			
+			translatedWordLabel.setString("");
+			translateWordButton->setText("Translate");
+			translateWordButton->setFillColor(buttonColor);
+			translatePressed = false;
+			
+			m_tryRating += round(float(summaryChars-mistakes)/(timer.restart().asSeconds()*10)); // TODO: improve formula
+
+			currentWordIndex++;
+			setWordToDisplay(words[currentWordIndex]);
+			if(words[currentWordIndex].empty()) {
+				std::cout << "*** SONG ENDED ***\n";
+				std::cout << "Rating: "<< m_tryRating << '\n';
+				std::cout << "Symbols written: "<< summaryChars << '\n';
+				std::cout << "Errors: " << mistakes << '\n' << std::flush;
+
+				std::string curTime = getCurrentTime();
+				plot.apply(curTime,m_tryRating);
+				writeRating(curTime,m_tryRating);
+
+				translatedWordLabel.setString("");
+				wordLabel.setString("Song ended! Press Enter to restart");
+				wordLabel.setOrigin(wordLabel.getGlobalBounds().width/2,wordLabel.getGlobalBounds().height/2);
+				wordLabel.setPosition(window->getSize().x/2, 200);
+
+				wordInput.clear();
+
+				isGameOver = true;
+			}
+		}
+
+	}
+	else if(e.text.unicode > SPACE_CODE && e.text.unicode < 128) {
+		if(!wordInput.appendLetter(e.text.unicode)) 
+			mistakes++;
+
+		wordInput.update(window->getSize());
+	}
+}
+
+void Engine::handleKeybinds(const sf::Event& e) {
+	if(isAnyDialogsOpen)
+		handleDialogKeybinds(e);	
+	else if(!isAnyDialogsOpen)
+		handleMainKeybinds(e);
+}
+
+void Engine::handleMouseClick(const sf::Vector2f& mouseClickPosition) {
+	if (exitButton->getGlobalBounds().contains(mouseClickPosition)) {
+		if (exitButton->isReady()) {
+			exitButton->setPressed(true);
+			isQuit = true;
+			window->close();
+		}
+	} else if(clearRatingButton->getGlobalBounds().contains(mouseClickPosition)) {
+		if(clearRatingButton->isReady()) {
+			clearRatingButton->setPressed(true);
+			
+			std::ofstream ratingFile(RATING_TXT_PATH);
+			if(ratingFile.is_open()){
+				std::cout << "Cleared rating at " << getCurrentTime() << std::endl;
+				ratingFile.close();
+
+				plot.reset();
+			}
+
+		}
+	} else if(requestLyricsButton->getGlobalBounds().contains(mouseClickPosition)) {
+		if(requestLyricsButton->isReady()) {
+			requestLyricsButton->setPressed(true);
+			
+			requestLyricsDialog = new RequestSongDialog("Request Song", sf::Vector2f(600,400),sf::Vector2f(150,50),sf::Color(151, 137, 139),font);
+			requestLyricsDialog->setPosition(sf::Vector2f(window->getSize().x/2,window->getSize().y/2));
+			requestLyricsDialog->show();
+			isAnyDialogsOpen = true;
+
+		}
+	} else if(loadLyricsButton->getGlobalBounds().contains(mouseClickPosition)) {
+			if(loadLyricsButton->isReady()) {
+				loadLyricsButton->setPressed(true);
+				
+				// open dialog with author and song name text fields
+				loadLyricsDialog = new LoadLyricsDialog("Load Lyrics", sf::Vector2f(600,400),sf::Vector2f(150,50),sf::Color(151, 137, 139),font);
+				loadLyricsDialog->setPosition(sf::Vector2f(window->getSize().x/2,window->getSize().y/2));
+				loadLyricsDialog->show();
+				isAnyDialogsOpen = true;
+			}
+	} else if(translateWordButton->getGlobalBounds().contains(mouseClickPosition)) {
+		if(translateWordButton->isReady() && !isGameOver && !words.empty()) {
+			if(!translatePressed) {
+				translateWordButton->setPressed(true);
+				
+				// change button state
+				translateWordButton->setFillColor(RED);
+				translateWordButton->setText("Hide");
+
+				currentTranslatedWord = translateWord(words[currentWordIndex]);
+				translatedWordLabel.setString(currentTranslatedWord);
+				translatedWordLabel.setOrigin(translatedWordLabel.getGlobalBounds().width/2,translatedWordLabel.getGlobalBounds().height/2);
+				translatedWordLabel.setPosition(window->getSize().x/2, 425);
+
+				translatePressed = true;
+			} else {
+				translateWordButton->setPressed(true);
+				
+				// change button state
+				translateWordButton->setFillColor(buttonColor);
+				translateWordButton->setText("Translate");
+
+				currentTranslatedWord = "";
+				translatedWordLabel.setString(currentTranslatedWord);
+				translatePressed = false;
+			}
+		}
+	}
+}
+
+void Engine::updateDialogs() {
+	if(requestLyricsDialog && requestLyricsDialog->getIsOpen()) {
+		requestLyricsDialog->update(dt);
+		DialogBase::Result res = requestLyricsDialog->getResult();
+		if(res == DialogBase::Accepted) {
+			std::string author = requestLyricsDialog->getAuthorName().toAnsiString(); /* get author name from text field */
+			std::string songname = requestLyricsDialog->getSongName().toAnsiString(); /* get song name from text field */
+
+			if(author.empty() || songname.empty())
+				std::cerr << "author or songname cannot be empty" << std::endl;
+			else {
+				AzLyricsParser parser;
+				words = parser.getLyricsList(author, songname);
+
+				initVariables();
+			}
+		}
+		if(res != DialogBase::None) {
+			freeDialog(requestLyricsDialog);
+			requestLyricsDialog = nullptr;
+		}
+	
+	} else if(loadLyricsDialog && loadLyricsDialog->getIsOpen()) {
+		loadLyricsDialog->update(dt);
+		DialogBase::Result res = loadLyricsDialog->getResult();
+		if(res == DialogBase::Accepted) {
+			std::string filepath = loadLyricsDialog->getPath().toAnsiString(); /* get song name from text field */
+			if(filepath.empty())
+				std::cerr << "cannot read the empty path" << std::endl;
+			else{
+				loadLyrics(filepath);
+				initVariables();
+			}
+		}
+		if(res != DialogBase::None){
+			freeDialog(loadLyricsDialog);
+			loadLyricsDialog = nullptr;
+		}
+	}
+}
+
+void Engine::updateButtons() {
+	exitButton->update(dt);
+	clearRatingButton->update(dt);
+	requestLyricsButton->update(dt);
+	loadLyricsButton->update(dt);
+	translateWordButton->update(dt);
+}
+
+void Engine::freeDialog(DialogBase* dialog) {
+	dialog->close();
+	delete dialog;
+	isAnyDialogsOpen = false;
+}
+
 void Engine::initVariables() {
-  m_dt = 0.f;
-	m_mouseDown = false;
-  m_wordIndex = 0;
-	m_counterA = 0.f;
+  dt = 0.f;
+	mouseDown = false;
+  currentWordIndex = 0;
 	m_tryRating = 0;
 	summaryChars = 0;
 	mistakes = 0;
 	m_tryRating = 0;
-	m_isAnyDialogsOpen = false;
-	m_isGameOver = false;
-	m_translatePressed = false;
-	
-	if(m_translateWordButton) {
-		m_translateWordButton->setText("Translate");
-		m_translateWordButton->setFillColor(m_buttonColor);
-	}
+	isAnyDialogsOpen = false;
+	isGameOver = false;
+	translatePressed = false;
 
 	float stat = calculateStats(mistakes,summaryChars);
 
-	m_mistakesLabel.setString(ftostr(stat)+"%");
-	m_mistakesLabel.setOrigin(m_mistakesLabel.getGlobalBounds().width/2,m_mistakesLabel.getGlobalBounds().height/2);
+	mistakesLabel.setString(ftostr(stat)+"%");
+	mistakesLabel.setOrigin(mistakesLabel.getGlobalBounds().width/2,mistakesLabel.getGlobalBounds().height/2);
 
-	m_correctLabel.setString(ftostr(100.f - stat)+"%");
-	m_correctLabel.setOrigin(m_correctLabel.getGlobalBounds().width/2,m_correctLabel.getGlobalBounds().height/2);
+	correctLabel.setString(ftostr(100.f - stat)+"%");
+	correctLabel.setOrigin(correctLabel.getGlobalBounds().width/2,correctLabel.getGlobalBounds().height/2);
 
-	m_currentTranslatedWord = "";
+	currentTranslatedWord = "";
 	
-	if(!m_words.empty())
-		setWordToDisplay(m_words[m_wordIndex]);
+	if(!words.empty())
+		setWordToDisplay(words[currentWordIndex]);
 
-	m_dtClock.restart();
-	m_timer.restart();
+	dtClock.restart();
+	timer.restart();
 }
 
-void Engine::start() {
-  while(m_app->isOpen()) {
+void Engine::run() {
+  while(window->isOpen()) {
 		sf::Event e;
-		while(m_app->pollEvent(e)) {
-			if(e.type == sf::Event::Closed)
-				m_app->close();
-			else {
-				if(e.type == sf::Event::TextEntered){
-					if(m_isAnyDialogsOpen) {
-						if(m_requestLyricsDialog && m_requestLyricsDialog->getIsOpen()){
-							
-							if(e.text.unicode == BACKSPACE_CODE)
-								m_requestLyricsDialog->symErased();
-							else if(e.text.unicode >= SPACE_CODE && e.text.unicode < 128)
-								m_requestLyricsDialog->symEntered(e.text.unicode);
-						} else if(m_loadLyricsDialog && m_loadLyricsDialog->getIsOpen()){
-							
-							if(e.text.unicode == BACKSPACE_CODE)
-								m_loadLyricsDialog->symErased();
-							else if(e.text.unicode >= SPACE_CODE && e.text.unicode < 128)
-								m_loadLyricsDialog->symEntered(e.text.unicode);
-						}
-					}
-					else if(!m_isAnyDialogsOpen) {
-						if(e.text.unicode == BACKSPACE_CODE) {
-							wordInput.removeLetter();
-						} else if(e.text.unicode == ENTER_CODE || e.text.unicode == SPACE_CODE) {
-							if(m_isGameOver) {
-								initVariables();
-								m_isGameOver = false;
-							}else if(wordInput.isFull() && !m_words.empty()) {
-								float stat = calculateStats(mistakes,summaryChars);
+		while(window->pollEvent(e)) {
+			switch(e.type) {
+			case sf::Event::Closed:
+				window->close();
+				break;
+			case sf::Event::TextEntered:
+				if(isAnyDialogsOpen)
+					handleDialogKeybinds(e);	
+				else if(!isAnyDialogsOpen)
+					handleMainKeybinds(e);
 
-								m_mistakesLabel.setString(ftostr(stat)+"%");
-								m_mistakesLabel.setOrigin(m_mistakesLabel.getGlobalBounds().width/2,m_mistakesLabel.getGlobalBounds().height/2);
+				break;
+			case sf::Event::MouseButtonReleased:
+				if(!isAnyDialogsOpen)
+					handleMouseClick(static_cast<sf::Vector2f>(sf::Mouse::getPosition()));
 
-								m_correctLabel.setString(ftostr(100.f - stat)+"%");
-								m_correctLabel.setOrigin(m_correctLabel.getGlobalBounds().width/2,m_correctLabel.getGlobalBounds().height/2);
-
-								
-								m_translatedWordLabel.setString("");
-								m_translateWordButton->setText("Translate");
-								m_translateWordButton->setFillColor(m_buttonColor);
-								m_translatePressed = false;
-								
-								m_tryRating += round(float(summaryChars-mistakes)/(m_timer.restart().asSeconds()*10)); // TODO: improve formula
-
-								m_wordIndex++;
-								setWordToDisplay(m_words[m_wordIndex]);
-								if(m_words[m_wordIndex].empty()) {
-									std::cout << "*** SONG ENDED ***\n";
-									std::cout << "Rating: "<< m_tryRating << '\n';
-									std::cout << "Symbols written: "<< summaryChars << '\n';
-									std::cout << "Errors: " << mistakes << '\n' << std::flush;
-			
-									std::string curTime = getCurrentTime();
-									m_plot.apply(curTime,m_tryRating);
-									writeRating(curTime,m_tryRating);
-
-									m_translatedWordLabel.setString("");
-									wordLabel.setString("Song ended! Press Enter to restart");
-									wordLabel.setOrigin(wordLabel.getGlobalBounds().width/2,wordLabel.getGlobalBounds().height/2);
-									wordLabel.setPosition(m_app->getSize().x/2, 200);
-
-									wordInput.clear();
-
-									m_isGameOver = true;
-								}
-							}
-
-						}
-						else if(e.text.unicode > SPACE_CODE && e.text.unicode < 128) {
-							if(!wordInput.appendLetter(e.text.unicode)) 
-								mistakes++;
-
-							wordInput.update(m_app->getSize());
-						}
-					}
-				}
+				break;
 			}
 		}
-		if(m_isAnyDialogsOpen) {
-			if(m_requestLyricsDialog && m_requestLyricsDialog->getIsOpen()) {
-				m_requestLyricsDialog->update(m_dt);
-				DialogBase::Result res = m_requestLyricsDialog->getResult();
-				if(res == DialogBase::Accepted) {
-					std::string author = m_requestLyricsDialog->getAuthorName().toAnsiString(); /* get author name from text field */
-					std::string songname = m_requestLyricsDialog->getSongName().toAnsiString(); /* get song name from text field */
+		
+		updateDialogs();
+		updateButtons();
 
-					if(author.empty() || songname.empty())
-						std::cerr << "author or songname cannot be empty" << std::endl;
-					else {
-						AzLyricsParser parser;
-						m_words = parser.getLyricsList(author, songname);
+		render();
 
-						initVariables();
-					}
-				}
-				if(res != DialogBase::None) {
-					m_requestLyricsDialog->close();
-					delete m_requestLyricsDialog;
-					m_requestLyricsDialog = nullptr;
-					m_isAnyDialogsOpen = false;
-				}
-			} else if(m_loadLyricsDialog && m_loadLyricsDialog->getIsOpen()) {
-				m_loadLyricsDialog->update(m_dt);
-				DialogBase::Result res = m_loadLyricsDialog->getResult();
-				if(res == DialogBase::Accepted) {
-					std::string filepath = m_loadLyricsDialog->getPath().toAnsiString(); /* get song name from text field */
-					if(filepath.empty())
-						std::cerr << "cannot read the empty path" << std::endl;
-					else{
-						loadLyrics(filepath);
-						initVariables();
-					}
-				}
-				if(res != DialogBase::None) {
-					m_loadLyricsDialog->close();
-					delete m_loadLyricsDialog;
-					m_loadLyricsDialog = nullptr;
-					m_isAnyDialogsOpen = false;
-				}
-			}
-			
-		} if(!m_isAnyDialogsOpen){		
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) m_mouseDown = true;
-
-			// act on mouse release
-			if (!sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_mouseDown) {
-				m_mouseDown = false;
-				if (m_exitButton->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition()))) {
-					if (m_exitButton->isReady()) {
-						m_exitButton->setPressed(true);
-						
-						m_quit = true;
-						m_app->close();
-					}
-				} else if(m_clearRatingButton->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition()))) {
-					if(m_clearRatingButton->isReady()) {
-						m_clearRatingButton->setPressed(true);
-						
-						std::ofstream ratingFile(RATING_TXT_PATH);
-						if(ratingFile.is_open()){
-							std::cout << "Cleared rating at " << getCurrentTime() << std::endl;
-							ratingFile.close();
-
-							m_plot.reset();
-						}
-
-					}
-				} else if(m_requestLyricsButton->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition()))) {
-					if(m_requestLyricsButton->isReady()) {
-						m_requestLyricsButton->setPressed(true);
-						
-						// open dialog with author and song name text fields
-						m_requestLyricsDialog = new RequestSongDialog("Request Song", sf::Vector2f(600,400),sf::Vector2f(150,50),sf::Color(151, 137, 139),m_font);
-						m_requestLyricsDialog->setPosition(sf::Vector2f(m_app->getSize().x/2,m_app->getSize().y/2));
-						m_requestLyricsDialog->show();
-						m_isAnyDialogsOpen = true;
-
-						// assert(0 && "not implemented");
-					}
-				} else if(m_loadLyricsButton->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition()))) {
-						if(m_loadLyricsButton->isReady()) {
-							m_loadLyricsButton->setPressed(true);
-							
-							// open dialog with author and song name text fields
-							m_loadLyricsDialog = new LoadLyricsDialog("Load Lyrics", sf::Vector2f(600,400),sf::Vector2f(150,50),sf::Color(151, 137, 139),m_font);
-							m_loadLyricsDialog->setPosition(sf::Vector2f(m_app->getSize().x/2,m_app->getSize().y/2));
-							m_loadLyricsDialog->show();
-							m_isAnyDialogsOpen = true;
-
-							// assert(0 && "not implemented");
-						}
-				} else if(m_translateWordButton->getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition()))) {
-					if(m_translateWordButton->isReady() && !m_isGameOver && !m_words.empty()) {
-						if(!m_translatePressed) {
-							m_translateWordButton->setPressed(true);
-							
-							// change button state
-							m_translateWordButton->setFillColor(RED);
-							m_translateWordButton->setText("Hide");
-
-							m_currentTranslatedWord = translateWord(m_words[m_wordIndex]);
-							m_translatedWordLabel.setString(m_currentTranslatedWord);
-							m_translatedWordLabel.setOrigin(m_translatedWordLabel.getGlobalBounds().width/2,m_translatedWordLabel.getGlobalBounds().height/2);
-							m_translatedWordLabel.setPosition(m_app->getSize().x/2, 425);
-
-							m_translatePressed = true;
-						} else {
-							m_translateWordButton->setPressed(true);
-							
-							// change button state
-							m_translateWordButton->setFillColor(m_buttonColor);
-							m_translateWordButton->setText("Translate");
-
-							m_currentTranslatedWord = "";
-							m_translatedWordLabel.setString(m_currentTranslatedWord);
-							m_translatePressed = false;
-						}
-					}
-				}
-			}
-		}
-		m_exitButton->update(m_dt);
-		m_clearRatingButton->update(m_dt);
-		m_requestLyricsButton->update(m_dt);
-		m_loadLyricsButton->update(m_dt);
-		m_translateWordButton->update(m_dt);
-		// if(m_enableTranslate->getChecked()) m_enableTranslate->update(m_dt);
-
-		m_app->clear(sf::Color(26, 26, 26));
-		m_app->draw(wordLabel);
-		m_app->draw(wordInput);
-
-		// if(m_enableTranslate->getChecked()) m_app->draw(m_translatedWordLabel);
-		m_app->draw(m_translatedWordLabel);
-
-		m_app->draw(m_mistakesLabel);
-		m_app->draw(m_correctLabel);
-		m_app->draw(m_plot);
-		m_app->draw(*m_exitButton);
-		m_app->draw(*m_clearRatingButton);
-		m_app->draw(*m_requestLyricsButton);
-		m_app->draw(*m_loadLyricsButton);
-		m_app->draw(*m_translateWordButton);
-
-	
-		if(m_requestLyricsDialog)
-			m_requestLyricsDialog->render(m_app);
-
-		if(m_loadLyricsDialog)
-			m_loadLyricsDialog->render(m_app);
-	
-		m_app->display();
-
-		m_dt = m_dtClock.restart().asSeconds();
-		m_counterA += m_dt;
+		dt = dtClock.restart().asSeconds();
 	}
 
 	wordInput.clear();
 }
 
+void Engine::render() {
+	window->clear(sf::Color(26, 26, 26));
+	window->draw(wordLabel);
+	window->draw(wordInput);
+
+	window->draw(translatedWordLabel);
+
+	window->draw(mistakesLabel);
+	window->draw(correctLabel);
+	window->draw(plot);
+	window->draw(*exitButton);
+	window->draw(*clearRatingButton);
+	window->draw(*requestLyricsButton);
+	window->draw(*loadLyricsButton);
+	window->draw(*translateWordButton);
+
+
+	if(requestLyricsDialog)
+		requestLyricsDialog->render(window);
+
+	if(loadLyricsDialog)
+		loadLyricsDialog->render(window);
+
+	window->display();
+}
+
 void Engine::loadLyrics(std::string path) {
 	
-	m_words.clear();
+	words.clear();
 
 	std::ifstream in(path);
 
@@ -365,9 +383,10 @@ void Engine::loadLyrics(std::string path) {
 		std::cout << "Unable to open file" << std::endl;
 		return;
 	}
+
 	std::string word;
 	while(in >> word)
-		m_words.push_back(word);
+		words.push_back(word);
 
 	in.close();
 
@@ -390,7 +409,7 @@ std::string Engine::ftostr(float x) const {
 
 std::string Engine::getRandomWord() {
 	srand(time(0));
-	return m_words[rand() % (m_words.size())];
+	return words[rand() % (words.size())];
 }
 
 std::string Engine::getCurrentTime() {
@@ -403,16 +422,16 @@ std::string Engine::getCurrentTime() {
 }
 
 std::string Engine::getNextWord() {
-	return (m_words.size() - 1 < m_wordIndex && !m_words.empty()) ? "" : m_words[m_wordIndex + 1];
+	return (words.size() - 1 < currentWordIndex && !words.empty()) ? "" : words[currentWordIndex + 1];
 }
 
 void Engine::setWordToDisplay(sf::String word) {
 	wordLabel.setString(word);
 	wordLabel.setOrigin(wordLabel.getGlobalBounds().width/2,wordLabel.getGlobalBounds().height/2);
-	wordLabel.setPosition(m_app->getSize().x/2, 200);
+	wordLabel.setPosition(window->getSize().x/2, 200);
 	
 	wordInput.clear();
-	wordInput.update(m_app->getSize());
+	wordInput.update(window->getSize());
 	wordInput.setWord(word);
 
 	summaryChars += word.getSize();
@@ -450,12 +469,12 @@ template<class T> void Engine::freeVector(std::vector<T*>& vec) {
 }
 
 bool Engine::writeRating(std::string time, float rating) {
-	m_ratingFile.open(RATING_TXT_PATH, std::ios_base::out | std::ios_base::app);
-	if(!m_ratingFile.is_open()) {
+	ratingFile.open(RATING_TXT_PATH, std::ios_base::out | std::ios_base::app);
+	if(!ratingFile.is_open()) {
 		std::cerr << "Engine::writeRating(std::string, float): error in opening rating file" << std::endl;
 		return false;
 	}
-	m_ratingFile << rating << ' ' << time << '\n';
-	m_ratingFile.close();
+	ratingFile << rating << ' ' << time << '\n';
+	ratingFile.close();
 	return true;
 }

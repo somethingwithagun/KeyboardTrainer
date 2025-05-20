@@ -29,11 +29,24 @@ public:
   Engine(int fps = 60);
   ~Engine();
 
-  void start();
+  void run();
 
   void init();
   
 private:
+  void handleDialogKeybinds(const sf::Event& e);
+  void handleMainKeybinds(const sf::Event& e);
+  void handleKeybinds(const sf::Event& e);
+  void handleMouseClick(const sf::Vector2f& mouseClickPosition);
+
+  void updateDialogs();
+  void updateButtons();
+  void update();
+
+  void render();
+
+
+  void freeDialog(DialogBase* dialog);
   void initVariables();
   
   std::string getRandomWord();
@@ -66,58 +79,52 @@ private:
     {'7', L"й"},
   }; //symbol to rus
 
-  int m_wordIndex;
+  int currentWordIndex;
 
-	sf::Clock m_dtClock;
-	sf::Clock m_timer;
+	sf::Clock dtClock;
+	sf::Clock timer;
 
-  sf::RenderWindow* m_app = nullptr;
-  int m_fps;
-  float m_dt;
-  bool m_quit = false;
-  float m_counterA;
-  bool m_mouseDown;
-  bool m_isGameOver;
-  bool m_isAnyDialogsOpen;
+  sf::RenderWindow* window = nullptr;
+  int fps;
+  float dt;
+  bool isQuit = false;
+  bool mouseDown;
+  bool isGameOver;
+  bool isAnyDialogsOpen;
   
-  //sf::String m_currentWord;
-  sf::String m_currentTranslatedWord;
+  sf::String currentTranslatedWord;
 
 	sf::Text wordLabel;
   WordInput wordInput;
-	sf::Text m_translatedWordLabel;
-	sf::Text m_mistakesLabel;
-	sf::Text m_correctLabel;
+	sf::Text translatedWordLabel;
+	sf::Text mistakesLabel;
+	sf::Text correctLabel;
 
-  sf::Color m_buttonColor = sf::Color(151, 137, 139);
+  sf::Color buttonColor = sf::Color(151, 137, 139);
 
-  Button* m_exitButton = nullptr;
-  Button* m_clearRatingButton = nullptr;
-  Button* m_requestLyricsButton = nullptr;
-  Button* m_loadLyricsButton = nullptr;
+  Button* exitButton = nullptr;
+  Button* clearRatingButton = nullptr;
+  Button* requestLyricsButton = nullptr;
+  Button* loadLyricsButton = nullptr;
 
-  Button* m_translateWordButton = nullptr;
-  bool m_translatePressed;
+  Button* translateWordButton = nullptr;
+  bool translatePressed;
   
-  RequestSongDialog* m_requestLyricsDialog = nullptr;
-  LoadLyricsDialog* m_loadLyricsDialog = nullptr;
+  RequestSongDialog* requestLyricsDialog = nullptr;
+  LoadLyricsDialog* loadLyricsDialog = nullptr;
 
-  PlotWidget<sf::String> m_plot;
+  PlotWidget<sf::String> plot;
 
 	int mistakes = 0;
 	int summaryChars = 0;
   int m_tryRating;
 
-  std::fstream m_ratingFile;
+  std::fstream ratingFile;
 
-  sf::Font m_font;
+  sf::Font font;
 
-  std::vector<std::string> m_words;
-  std::vector<sf::String> m_translatedWords;
-  //std::vector<sf::RectangleShape*> letterPlaces;
-	//std::vector<sf::Text*> letters;
-
-
+  std::vector<std::string> words;
+  std::vector<sf::String> translatedWords;
 };
 
 #endif

@@ -30,7 +30,7 @@ public:
 private:
   template<class T> void cleanVector(std::vector<T*>& vec);
 
-  const int m_charSpacing = 20;
+  const int letterSpacing = 20;
   sf::Vector2u appWindowSize;
 
   sf::Font font;

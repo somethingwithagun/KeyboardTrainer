@@ -76,12 +76,12 @@ int WordInput::getExpectedLettersCount() {
 void WordInput::setWord(const sf::String& word) {
 	this->word = word;
 	
-	int word_container_width = word.getSize()*(100 +m_charSpacing) - m_charSpacing;
+	int word_container_width = word.getSize()*(100 +letterSpacing) - letterSpacing;
 	int offset = appWindowSize.x/2 - word_container_width/2 + 50;
 	for(int i = 0; i < word.getSize(); i++) {
 			letterPlaces.push_back(new sf::RectangleShape(sf::Vector2f(100,15)));
 			letterPlaces[i]->setOrigin(letterPlaces[i]->getSize().x/2,letterPlaces[i]->getSize().y/2);
-			letterPlaces[i]->setPosition(sf::Vector2f((m_charSpacing+100) * i + offset, 350));
+			letterPlaces[i]->setPosition(sf::Vector2f((letterSpacing+100) * i + offset, 350));
 	}
 }
 

@@ -88,7 +88,7 @@ int main() {
 	check_last_day();
 	Engine engine(50);
 	engine.init();
-	engine.start();
+	engine.run();
 
 	// sf::RenderWindow app(sf::VideoMode(0,0),"Keyboard Trainer controller", sf::Style::Default | sf::Style::Fullscreen);
 	// app.setFramerateLimit(30);
