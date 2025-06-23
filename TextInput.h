@@ -7,7 +7,7 @@
 #define DEFAULT_BACKGROUND_SIZE sf::Vector2f(220,30)
 #define DEFAULT_CHARACTER_LIMIT 50
 
-class TextInput
+class TextInput : public sf::Drawable
 {
 
 public:
@@ -23,7 +23,7 @@ public:
 	};
 
 	void update(double deltaT);
-	void render(sf::RenderTarget* target = nullptr);
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 	/* SETTERS */
 
@@ -72,25 +72,25 @@ public:
 	const TextAlign& getAlign() const;
 private:
 
-	sf::Font m_font;
+	sf::Font font;
 
-	sf::RectangleShape m_background;
+	sf::RectangleShape background;
 
-	sf::Text m_label;
+	sf::Text label;
 
-	sf::Text m_placeholderLabel;
+	sf::Text placeholderLabel;
 
-	sf::String m_text;
+	sf::String text;
 
-	sf::String m_placeholderText;
+	sf::String placeholderText;
 
-	bool m_active = false;
+	bool active = false;
 
-	double m_counter = 0.0;
+	double counter = 0.0;
 
-	TextAlign m_alignment = Center;
+	TextAlign alignment = Center;
 
-	int m_charactersLimit = DEFAULT_CHARACTER_LIMIT;
+	int charactersLimit = DEFAULT_CHARACTER_LIMIT;
 
 };
 

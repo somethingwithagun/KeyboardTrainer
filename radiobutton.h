@@ -50,7 +50,7 @@ private:
 	sf::Color m_source_check_color;
 
 	float m_waitTime;
-	float m_counter;
+	float counter;
 
 	bool m_enabled;
 	bool m_checked;

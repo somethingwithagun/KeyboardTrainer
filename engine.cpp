@@ -23,7 +23,7 @@ Engine::Engine(int fps) : fps(fps) {
 	}
 	
 	plot.setSize(sf::Vector2f(1000,400));
-	plot.setFont(&font);
+	plot.setFont(font);
   plot.setOrigin(plot.getSize().x/2,plot.getSize().y/2);
 }
 
@@ -121,8 +121,9 @@ void Engine::handleMainKeybinds(const sf::Event& e) {
 			m_tryRating += round(float(summaryChars-mistakes)/(timer.restart().asSeconds()*10)); // TODO: improve formula
 
 			currentWordIndex++;
-			setWordToDisplay(words[currentWordIndex]);
-			if(words[currentWordIndex].empty()) {
+			if(currentWordIndex < words.size())
+				setWordToDisplay(words[currentWordIndex]);
+			else {
 				std::cout << "*** SONG ENDED ***\n";
 				std::cout << "Rating: "<< m_tryRating << '\n';
 				std::cout << "Symbols written: "<< summaryChars << '\n';

@@ -64,7 +64,7 @@ private:
 	sf::Color m_source_text_color;
 
 	float m_waitTime;
-	float m_counter;
+	float counter;
 
 	bool m_enabled;
 	bool pressed;

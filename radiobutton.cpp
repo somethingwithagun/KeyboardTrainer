@@ -15,7 +15,7 @@ RadioButton::RadioButton(sf::Vector2f size, sf::Color bgColor)
 	this->m_check.setPosition(m_body.getPosition());
 	
 	m_waitTime = 0.05f;
-	m_counter = 0.f;
+	counter = 0.f;
 }
 
 RadioButton::~RadioButton() {
@@ -32,7 +32,7 @@ const sf::FloatRect RadioButton::getGlobalBounds() const {
 }
 
 void RadioButton::update(double deltaT) {
-	m_counter += deltaT;
+	counter += deltaT;
 }
 
 void RadioButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -43,7 +43,7 @@ void RadioButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 bool RadioButton::isReady() const {
-	return (m_counter >= m_waitTime);
+	return (counter >= m_waitTime);
 }
 
 void RadioButton::setChecked(bool checked) {
@@ -87,7 +87,7 @@ void RadioButton::setEnabled(bool enabled)
 
 void RadioButton::setWaitTime(const float& waitTime) {
 	m_waitTime = waitTime;
-	m_counter = 0.f;
+	counter = 0.f;
 }
 
 const sf::Vector2f RadioButton::getSize() const

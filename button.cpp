@@ -18,7 +18,7 @@ Button::Button(sf::Vector2f size, sf::String text, sf::Font font, sf::Color bgCo
 	this->text.setOrigin(this->text.getGlobalBounds().width / 2, (this->text.getGlobalBounds().height / 2) + this->text.getGlobalBounds().height / 4);
 
 	m_waitTime = 1.f;
-	m_counter = 0.f;
+	counter = 0.f;
 }
 
 Button::Button(sf::Vector2f size, sf::String text, sf::Color bgColor, int textSize)
@@ -42,7 +42,7 @@ Button::Button(sf::Vector2f size, sf::String text, sf::Color bgColor, int textSi
 	this->font.loadFromFile(NOTOSANS_FONT_PATH);
 	
 	m_waitTime = 0.05f;
-	m_counter = 0.f;
+	counter = 0.f;
 }
 
 Button::~Button() {
@@ -62,10 +62,10 @@ void Button::update(double deltaT)
 	
 	if (pressed) {
 		pressed = false;
-		m_counter = 0.f;
+		counter = 0.f;
 	}
 
-	m_counter += deltaT;
+	counter += deltaT;
 }
 
 void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -75,7 +75,7 @@ void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
 }
 
 bool Button::isReady() const {
-	return (m_counter >= m_waitTime);
+	return (counter >= m_waitTime);
 }
 
 void Button::setText(sf::String text)
@@ -131,7 +131,7 @@ void Button::setEnabled(bool enabled)
 
 void Button::setWaitTime(const float& waitTime) {
 	m_waitTime = waitTime;
-	m_counter = 0.f;
+	counter = 0.f;
 }
 
 const sf::Vector2f Button::getSize() const

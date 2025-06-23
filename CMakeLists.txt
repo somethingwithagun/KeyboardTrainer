@@ -11,7 +11,7 @@ include_directories(${CURL_INCLUDE_DIR})
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "-g")
 
-add_executable(MKT WIN32
+add_executable(MKT
 	dialogbase.h dialogbase.cpp
 	requestsongdialog.h requestsongdialog.cpp
 	loadlyricsdialog.h loadlyricsdialog.cpp

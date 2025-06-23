@@ -28,14 +28,14 @@ protected:
 
 	Button* m_closeButton = nullptr;
 
-	sf::RectangleShape m_background;
+	sf::RectangleShape background;
 
 	sf::Texture* m_backgroundTexture = nullptr;
-	sf::Font m_font;
+	sf::Font font;
 
 	Result m_result;
 
-	sf::Text m_text;
+	sf::Text label;
 	sf::Vector2f m_textRelPos;
 
 

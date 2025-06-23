@@ -1,18 +1,20 @@
 #include "requestsongdialog.h"
 
 RequestSongDialog::RequestSongDialog(const sf::String& text, const sf::Vector2f background_size,
-  const sf::Vector2f buttons_size, const sf::Color buttons_color, const sf::Font& font) : DialogBase(background_size,buttons_size,buttons_color,font) {
-  m_text.setString(text);
-  m_textRelPos = {m_text.getGlobalBounds().width/2,175};
-  m_text.setPosition(m_background.getPosition()-m_textRelPos);
+  const sf::Vector2f buttons_size, const sf::Color buttons_color, const sf::Font& font) 
+  : DialogBase(background_size,buttons_size,buttons_color,font)
+{
+  label.setString(text);
+  m_textRelPos = {label.getGlobalBounds().width/2,175};
+  label.setPosition(background.getPosition()-m_textRelPos);
 
   sf::Vector2f textInputSize = {background_size.x - 40,50};
-  m_authorInput = new TextInput(textInputSize,m_font);
-  m_authorInput->setPosition(m_background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/4));
+  m_authorInput = new TextInput(textInputSize,this->font);
+  m_authorInput->setPosition(background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/4));
   m_authorInput->setPlaceholderText("Author");
 
-  m_songInput = new TextInput(textInputSize,m_font);
-  m_songInput->setPosition(m_background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/2));
+  m_songInput = new TextInput(textInputSize,this->font);
+  m_songInput->setPosition(background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/2));
   m_songInput->setPlaceholderText("Song");
 }
 
@@ -72,15 +74,15 @@ void RequestSongDialog::update(const float& dt) {
 
 void RequestSongDialog::render(sf::RenderTarget* target) {
   DialogBase::render(target);
-  
-  m_authorInput->render(target);
-  m_songInput->render(target);
+
+  target->draw(*m_authorInput);
+  target->draw(*m_songInput);
 }
 
 void RequestSongDialog::setPosition(const sf::Vector2f& pos) {
   DialogBase::setPosition(pos);
-  sf::Vector2f background_size = m_background.getSize();
-  m_authorInput->setPosition({m_background.getPosition().x, m_background.getPosition().y - 75});
-  m_songInput->setPosition({m_background.getPosition().x, m_background.getPosition().y + 25});
-  // m_songInput->setPosition(m_background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/2));  
+  sf::Vector2f background_size = background.getSize();
+  m_authorInput->setPosition({background.getPosition().x, background.getPosition().y - 75});
+  m_songInput->setPosition({background.getPosition().x, background.getPosition().y + 25});
+  // m_songInput->setPosition(background.getPosition() + sf::Vector2f(background_size.x/2, background_size.y/2));  
 }

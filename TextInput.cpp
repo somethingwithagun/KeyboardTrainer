@@ -1,24 +1,24 @@
 #include "TextInput.h"
 
-TextInput::TextInput() : TextInput(DEFAULT_BACKGROUND_SIZE, m_font, 16)
+TextInput::TextInput() : TextInput(DEFAULT_BACKGROUND_SIZE, font, 16)
 {
 	//sf::Font font = new sf:
 }
 
-TextInput::TextInput(const sf::Vector2f& bgsize, sf::Font& font, const int character_size) : m_font(font)
+TextInput::TextInput(const sf::Vector2f& bgsize, sf::Font& font, const int character_size) : font(font)
 {
-	m_background.setSize(bgsize);
-	m_background.setFillColor(sf::Color::White);
-	m_background.setOrigin(m_background.getSize().x / 2, m_background.getSize().y / 2);
+	background.setSize(bgsize);
+	background.setFillColor(sf::Color::White);
+	background.setOrigin(background.getSize().x / 2, background.getSize().y / 2);
 
-	m_label.setCharacterSize(character_size);
-	m_label.setFillColor(sf::Color::Black);
-	m_label.setFont(m_font);
+	label.setCharacterSize(character_size);
+	label.setFillColor(sf::Color::Black);
+	label.setFont(font);
 
-	m_placeholderLabel.setCharacterSize(character_size);
-	m_placeholderLabel.setFont(m_font);
-	m_placeholderLabel.setFillColor(sf::Color(m_label.getFillColor().r, m_label.getFillColor().g, m_label.getFillColor().b, m_label.getFillColor().a + 40));
-	m_placeholderLabel.setStyle(sf::Text::Italic);
+	placeholderLabel.setCharacterSize(character_size);
+	placeholderLabel.setFont(font);
+	placeholderLabel.setFillColor(sf::Color(label.getFillColor().r, label.getFillColor().g, label.getFillColor().b, label.getFillColor().a + 40));
+	placeholderLabel.setStyle(sf::Text::Italic);
 }
 
 TextInput::~TextInput() {
@@ -26,179 +26,177 @@ TextInput::~TextInput() {
 
 const sf::String& TextInput::getPlaceholderText() const
 {
-	return m_placeholderText;
+	return placeholderText;
 }
 
 void TextInput::update(double deltaT)
 {
 
-	switch (m_alignment)
+	switch (alignment)
 	{
 	case TextInput::Left:
-		m_label.setOrigin((m_background.getSize().x / 2) - 5, (m_background.getSize().y / 2) - m_label.getGlobalBounds().height / 4);
-		m_placeholderLabel.setOrigin((m_background.getSize().x / 2) - 5, (m_background.getSize().y / 2) - m_placeholderLabel.getGlobalBounds().height / 4);
+		label.setOrigin((background.getSize().x / 2) - 5, (background.getSize().y / 2) - label.getGlobalBounds().height / 4);
+		placeholderLabel.setOrigin((background.getSize().x / 2) - 5, (background.getSize().y / 2) - placeholderLabel.getGlobalBounds().height / 4);
 		break;
 	case TextInput::Center:
-		m_label.setOrigin(m_label.getGlobalBounds().width / 2, (m_label.getGlobalBounds().height / 2) + m_label.getGlobalBounds().height / 4);
-		m_placeholderLabel.setOrigin(m_placeholderLabel.getGlobalBounds().width / 2, (m_placeholderLabel.getGlobalBounds().height / 2) + m_label.getGlobalBounds().height / 4);
+		label.setOrigin(label.getGlobalBounds().width / 2, (label.getGlobalBounds().height / 2) + label.getGlobalBounds().height / 4);
+		placeholderLabel.setOrigin(placeholderLabel.getGlobalBounds().width / 2, (placeholderLabel.getGlobalBounds().height / 2) + label.getGlobalBounds().height / 4);
 		break;
 	case TextInput::Right:
-		m_label.setOrigin((m_label.getGlobalBounds().width - m_background.getSize().x / 2) + 5, (m_label.getGlobalBounds().height / 2) + m_label.getGlobalBounds().height / 4);
-		m_placeholderLabel.setOrigin((m_placeholderLabel.getGlobalBounds().width - m_background.getSize().x / 2) + 5, (m_placeholderLabel.getGlobalBounds().height / 2) + m_label.getGlobalBounds().height / 4);
+		label.setOrigin((label.getGlobalBounds().width - background.getSize().x / 2) + 5, (label.getGlobalBounds().height / 2) + label.getGlobalBounds().height / 4);
+		placeholderLabel.setOrigin((placeholderLabel.getGlobalBounds().width - background.getSize().x / 2) + 5, (placeholderLabel.getGlobalBounds().height / 2) + label.getGlobalBounds().height / 4);
 		break;
 	default:
 		break;
 	}
 
-	if (m_text.getSize() > 0 && !m_active && m_text[m_text.getSize() - 1] == '_') {
-		m_text.erase(m_text.getSize() - 1, 1);
-		this->setText(m_text);
+	if (text.getSize() > 0 && !active && text[text.getSize() - 1] == '_') {
+		text.erase(text.getSize() - 1, 1);
+		this->setText(text);
 	}
-	else if (m_text.getSize() > 0 && m_active && m_text[m_text.getSize() - 1] != '_')
-		this->setText(m_text);
+	else if (text.getSize() > 0 && active && text[text.getSize() - 1] != '_')
+		this->setText(text);
 
-	if (m_counter > 0.06)
+	if (counter > 0.06)
 	{
 
 	}
 
-	m_counter += deltaT;
+	counter += deltaT;
 }
 
-void TextInput::render(sf::RenderTarget* target)
-{
-	target->draw(m_background);
+void TextInput::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+	target.draw(background);	
 
-	if (m_text.getSize())
-		target->draw(m_label);
-	else if (m_placeholderText.getSize())
-		target->draw(m_placeholderLabel);
+	if (text.getSize())
+		target.draw(label);
+	else if (placeholderText.getSize())
+		target.draw(placeholderLabel);
 }
 
-void TextInput::setPlaceholderText(const sf::String& text) {
-	if (text.getSize() > m_charactersLimit)
+void TextInput::setPlaceholderText(const sf::String& newText) {
+	if (newText.getSize() > charactersLimit)
 	{
 		std::cerr << "Max characters limit reached!\n";
 		return;
 	}
 
-	m_placeholderText = text;
+	placeholderText = newText;
 
-	m_placeholderLabel.setString(m_placeholderText);
+	placeholderLabel.setString(placeholderText);
 }
 
 void TextInput::setAlign(TextAlign align)
 {
-	m_alignment = align;
+	alignment = align;
 }
 
 void TextInput::setActive(bool active)
 {
-	m_active = active;
+	this->active = active;
 }
 
 void TextInput::setFont(const sf::Font& font)
 {
-	m_font = font;
-	m_label.setFont(m_font);
-	m_placeholderLabel.setFont(m_font);
+	this->font = font;
+	label.setFont(font);
+	placeholderLabel.setFont(font);
 }
 
 void TextInput::setBackgroundColor(const sf::Color& color)
 {
-	m_background.setFillColor(color);
+	background.setFillColor(color);
 }
 
 void TextInput::setTextColor(const sf::Color& color)
 {
-	m_label.setFillColor(color);
-	m_placeholderLabel.setFillColor(sf::Color(m_label.getFillColor().r, m_label.getFillColor().g, m_label.getFillColor().b, m_label.getFillColor().a + 40));
+	label.setFillColor(color);
+	placeholderLabel.setFillColor(sf::Color(label.getFillColor().r, label.getFillColor().g, label.getFillColor().b, label.getFillColor().a + 40));
 }
 
 void TextInput::setCharacterSize(const unsigned int& size)
 {
-	m_label.setCharacterSize(size);
-	m_placeholderLabel.setCharacterSize(size);
+	label.setCharacterSize(size);
+	placeholderLabel.setCharacterSize(size);
 }
 
 void TextInput::setSize(const sf::Vector2f& size)
 {
-	m_background.setSize(size);
+	background.setSize(size);
 }
 
 void TextInput::setPosition(const sf::Vector2f& pos)
 {
-	m_background.setPosition(pos);
-	m_label.setPosition(m_background.getPosition());
-	m_placeholderLabel.setPosition(m_background.getPosition());
+	background.setPosition(pos);
+	label.setPosition(background.getPosition());
+	placeholderLabel.setPosition(background.getPosition());
 }
 
-void TextInput::setText(const sf::String& text)
+void TextInput::setText(const sf::String& newText)
 {
-	if (text.getSize() > m_charactersLimit)
+	if (newText.getSize() > charactersLimit)
 	{
 		std::cerr << "Max characters limit reached!\n";
 		return;
 	}
 
-	if (m_active)
-		m_text = text + '_';
+	if (active)
+		this->text = newText + '_';
 
-	m_label.setString(m_text);
+	label.setString(this->text);
 }
 
 void TextInput::setCharactersLimit(const unsigned int limit)
 {
-	m_charactersLimit = limit;
+	charactersLimit = limit;
 }
 
 const int TextInput::getCharactersLimit() const
 {
-	return m_charactersLimit;
+	return charactersLimit;
 }
 
 const sf::FloatRect TextInput::getGlobalBounds() const
 {
-	return m_background.getGlobalBounds();
+	return background.getGlobalBounds();
 }
 
 const sf::Vector2f TextInput::getSize() const
 {
-	return m_background.getSize();
+	return background.getSize();
 }
 
 const int TextInput::getCharacterSize() const
 {
-	return m_label.getCharacterSize();
+	return label.getCharacterSize();
 }
 
-const sf::String TextInput::getText() const
-{
-	if (m_text.getSize() > 0 && m_active && m_text[m_text.getSize() - 1] == '_') {
-		sf::String text = m_text;
-		text.erase(text.getSize() - 1, 1);
-		return text;
+const sf::String TextInput::getText() const {
+	if (text.getSize() > 0 && active && text[text.getSize() - 1] == '_') {
+		sf::String newText = text;
+		newText.erase(text.getSize() - 1, 1);
+		return newText;
 	}
 
-	return m_text;
+	return text;
 }
 
 const sf::Color& TextInput::getTextColor() const
 {
-	return m_label.getFillColor();
+	return label.getFillColor();
 }
 
 const sf::Color& TextInput::getBackgroundColor() const
 {
-	return m_background.getFillColor();
+	return background.getFillColor();
 }
 
 const bool TextInput::getActive() const
 {
-	return m_active;
+	return active;
 }
 
 const TextInput::TextAlign& TextInput::getAlign() const
 {
-	return m_alignment;
+	return alignment;
 }

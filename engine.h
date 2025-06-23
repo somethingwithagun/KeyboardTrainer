@@ -41,7 +41,6 @@ private:
 
   void updateDialogs();
   void updateButtons();
-  void update();
 
   void render();
 
